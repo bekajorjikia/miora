@@ -76,30 +76,53 @@ build a language switcher here; render `restaurant.defaultLanguage` only.
    Asian-restaurant content (e.g. Appetizers / Noodles & Rice / Curries / Drinks).
    It must include, to exercise the edge cases:
    - at least one item with `available: false`
+   - **at least one category where every item is `available: false`** (see the
+     visibility rule in step 6)
    - at least one item with **no** `photoUrl`
    - at least one item with a `photoUrl` that will not load (use
      `https://example.invalid/missing.jpg`)
+   - **at least two items with a photo that loads successfully.** Put these image
+     files in `public/seed/` and reference them as `/seed/<name>.jpg` — seed
+     rendering must be deterministic and work offline. (The `photoUrl` type still
+     accepts arbitrary external URLs; that's just not what the fixture relies on.)
    - at least one item with multiple tags, and one with none
-   - `en` plus one other language populated in every `Localized` field
+   - **`en` plus one Asian language** (e.g. `th`, `ja`, `ko`, `zh`) populated in
+     every `Localized` field — PRD §3 requires English plus one Asian language.
 3. Create `src/lib/menu.ts` with pure, testable helpers:
    - `getLocalized(value: Localized, lang: LanguageCode, fallback: LanguageCode): string`
-     — returns the requested language, falling back if missing, and never throws.
+     — returns the requested language; falls back to `fallback` if the requested
+     one is missing or empty; returns `""` if both are missing. Never throws.
    - `formatPrice(priceMinor: number, currency: string, locale: string): string`
      — uses `Intl.NumberFormat`; `1250` + `"GEL"` renders as a proper currency
-     string.
-   - `groupItemsByCategory(categories, items)` — returns categories in
-     `sortOrder`, each with its items in `sortOrder`. Categories with no available
-     items are omitted entirely.
+     string. Pass `restaurant.defaultLanguage` as `locale` at the call site.
+   - `groupItemsByCategory(categories, items)` with this **exact** return type:
+
+     ```ts
+     Array<{ category: Category; items: MenuItem[] }>
+     ```
+
+     Categories come back in `sortOrder`, each with its items in `sortOrder`.
+     **Omit a category only if it has no items at all.** A category whose items
+     are all unavailable still appears — see step 6.
 4. Build components under `src/components/`:
    - `MenuItemCard.tsx` — name, description, formatted price, tags, photo.
    - `CategorySection.tsx` — a category heading plus its items.
    - `MenuView.tsx` — the whole menu, composing the above.
-5. Replace `src/app/page.tsx` to render `MenuView` from the seed data.
+5. Replace `src/app/page.tsx` to render `MenuView` from the seed data. Also update
+   the page metadata in `src/app/layout.tsx` — it still carries the default
+   "Create Next App" title/description. Use the restaurant name and a short menu
+   description.
 6. Handle the required states:
    - **Sold out**: items with `available: false` render visibly greyed/dimmed with
-     a "Sold out" label. They are NOT hidden.
+     a "Sold out" label. They are NOT hidden — at item level or category level.
+     A category whose items are *all* sold out still renders, with all its items
+     dimmed. (Rationale: "we serve curries, they're gone tonight" is useful to a
+     diner, and it's the only rule consistent with never hiding sold-out items.)
    - **Missing/broken photo**: the card renders a neutral placeholder and keeps
-     its layout. No broken-image icon, no layout shift, no console error crash.
+     its layout. No broken-image icon and no layout shift.
+   - **Alt text**: a photo that loads uses the item's localized name as its `alt`.
+     The placeholder is decorative — give it `alt=""` (or `aria-hidden`) rather
+     than alt text describing a missing image.
 7. Write tests in `tests/menu.test.ts` covering the helpers from step 3.
 
 ## Design constraints
@@ -117,15 +140,25 @@ build a language switcher here; render `restaurant.defaultLanguage` only.
 
 - [ ] `npm run build` passes
 - [ ] `npm run lint` passes
-- [ ] `npm test` passes, including new tests for `getLocalized`, `formatPrice`,
-      and `groupItemsByCategory` (grouping, sort order, and omission of
-      empty categories are each asserted)
+- [ ] `npm test` passes, including new tests for the step-3 helpers. These cases
+      must each be asserted:
+      - `getLocalized` returns the requested language; falls back when it's
+        missing; returns `""` when both requested and fallback are missing
+      - `formatPrice(1250, "GEL", …)` renders the correct currency string
+      - `groupItemsByCategory` returns categories in `sortOrder`, items within
+        each in `sortOrder`, **keeps** a category whose items are all
+        unavailable, and **omits** a category with no items at all
 - [ ] `npm run dev` at `/` shows all seeded categories with their items
 - [ ] At 375px width there is **no horizontal scroll**
 - [ ] The unavailable item is visible, dimmed, and labelled "Sold out"
+- [ ] The all-unavailable category still appears, with every item dimmed
 - [ ] The item with no photo and the item with the broken photo URL both render
       with a placeholder, correct layout, and no visible broken-image icon
-- [ ] No errors in the browser console
+- [ ] The items with working photos display them, with the item name as `alt`
+- [ ] The browser tab title is the restaurant name, not "Create Next App"
+- [ ] **No uncaught application errors in the browser console.** The failed
+      network request for the intentionally broken image URL is expected and
+      allowed — it is not a failure of this check.
 
 ## Out of scope
 
