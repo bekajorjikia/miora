@@ -1,25 +1,33 @@
-# Tech Stack — proposal
-
-> **This is a proposal, not a decision.** Adjust it with the human before workers
-> start building. Once agreed, it's source of truth (Claude owns edits).
+# Tech Stack
 
 ## Goals driving the choices
 
 Mobile-first, fast first paint, simple to host, easy for AI workers to build in a
 mainstream stack with lots of examples.
 
-## Proposed stack
+## Decided — in the repo as of TASK-001
 
-| Concern        | Choice                          | Why |
+| Concern   | Choice                       | Why |
+|-----------|------------------------------|-----|
+| Framework | Next.js 16 (App Router) + React | SSR/SSG for fast menu first paint; one codebase for diner + admin. |
+| Language  | TypeScript                   | Type safety helps workers stay in bounds. |
+| Styling   | Tailwind CSS 4               | Fast, consistent, mobile-first utilities. |
+| Unit test | Vitest                       | Acceptance checks in task files run against it. |
+
+These are settled — they're built and committed. Changing one now means a
+migration, not a decision.
+
+## Proposed — not yet built, still open
+
+| Concern        | Proposal                        | Why |
 |----------------|---------------------------------|-----|
-| Framework      | Next.js (App Router) + React    | SSR/SSG for fast menu first paint; one codebase for diner + admin; huge ecosystem. |
-| Language       | TypeScript                      | Type safety helps workers stay in bounds. |
-| Styling        | Tailwind CSS                    | Fast, consistent, mobile-first utilities. |
 | Data / backend | Supabase (Postgres + Auth + Storage) | Managed DB, staff auth, and photo storage in one; no custom server needed for v1. |
-| i18n           | `next-intl` (UI) + per-language columns/JSON for menu content | Separates UI strings from translatable menu data. |
-| QR generation  | `qrcode` library, server-side   | Generate printable QR codes for restaurant/tables. |
+| i18n           | `next-intl` (UI) + per-language menu content | Separates UI strings from translatable menu data. |
+| QR generation  | `qrcode` library, server-side   | Generate printable QR codes. |
 | Hosting        | Vercel                          | First-class Next.js hosting; fast to ship. |
-| Testing        | Vitest (unit) + Playwright (e2e mobile viewport) | Acceptance checks in task files can run these. |
+| E2E test       | Playwright (mobile viewport)    | Verifies the diner flow on a real phone-sized viewport. |
+
+Confirm each of these before the task that introduces it — not before.
 
 ## Repo layout (proposed)
 
@@ -47,8 +55,11 @@ npm run e2e       # playwright
 
 ## Decisions still open
 
-- Confirm Supabase vs. an alternative (e.g. Postgres + custom API).
-- Confirm hosting (Vercel).
-- Confirm launch languages.
+- Supabase vs. an alternative (e.g. Postgres + a custom API) — decide before the
+  data-layer task.
+- Hosting (Vercel assumed) — decide before the first deploy task.
+- Launch languages — decide before the i18n task.
+- Photo hosting: upload + storage, or paste URLs in v1 — decide before the
+  menu-item admin task.
 
-Once these are settled, remove this section and the "proposal" banner.
+Move each line up into the table above when it's settled.

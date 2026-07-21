@@ -50,24 +50,38 @@ These may become v2 — keep the data model open to them, but don't build them.
 - **i18n-ready**: item content is translatable; UI strings are translatable.
 - **Accessible**: readable contrast, tap targets ≥44px, semantic markup.
 
-## 6. Core data model (starting point — Claude refines in tasks)
+## 6. Tenancy — DECIDED: single restaurant for v1
+
+v1 serves **one restaurant**. No restaurant switcher, no per-restaurant signup, no
+tenant routing (`/[slug]`); the menu lives at the root.
+
+**But the schema keeps `restaurantId` on every table anyway.** Adding a column to
+populated tables later is a migration and a rewrite of every query; carrying an
+unused foreign key now costs nothing. So: single-tenant *behaviour*, multi-tenant
+*shape*. Don't build UI or routing for multiple restaurants — just don't design
+the schema so they're impossible.
+
+## 7. Core data model (starting point — Claude refines in tasks)
 
 - `Restaurant` — id, name, slug, default language, supported languages, theme.
+  (Exactly one row in v1.)
 - `Category` — id, restaurantId, name (per language), sort order.
 - `MenuItem` — id, categoryId, name/description (per language), price, currency,
   photoUrl, tags[], available (bool), sort order.
 - `Table` (optional) — id, restaurantId, label, qr target.
 - `StaffUser` — id, restaurantId, email, role.
 
-## 7. Success criteria for MVP
+## 8. Success criteria for MVP
 
 - A diner can scan → see a categorized, translated menu on a phone in under ~3s.
 - Staff can add/edit an item and see it live without a redeploy.
 - Staff can print a working QR code that opens the correct restaurant's menu.
 
-## 8. Open questions (resolve before/while building)
+## 9. Open questions (resolve before/while building)
 
 - Hosting target? (Vercel / other)
 - Which second language(s) to launch with?
-- One restaurant to start, or multi-restaurant from day one?
 - Photo hosting: upload + storage, or paste URLs in v1?
+
+~~One restaurant to start, or multi-restaurant from day one?~~ → **Decided:
+single restaurant, multi-tenant-shaped schema. See §6.**
