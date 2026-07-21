@@ -81,7 +81,12 @@ the schema so they're impossible.
 
 - Hosting target? (Vercel / other)
 - Which second language(s) to launch with?
-- Photo hosting: upload + storage, or paste URLs in v1?
 
 ~~One restaurant to start, or multi-restaurant from day one?~~ → **Decided:
 single restaurant, multi-tenant-shaped schema. See §6.**
+
+~~Photo hosting: upload + storage, or paste URLs in v1?~~ → **Decided: paste URLs
+in v1.** `MenuItem.photoUrl` is a plain external URL. No upload, no storage, no
+resizing. Because photos are then third-party and can fail, every item must render
+correctly with a broken or missing image (see §5, "Reliable"). Upload is a
+post-v1 task.
