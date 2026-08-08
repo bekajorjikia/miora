@@ -1,12 +1,9 @@
-import { MenuView } from "@/components/MenuView";
-import { categories, menuItems, restaurant } from "@/lib/seed-data";
+import { WelcomePage } from "@/components/WelcomePage";
+import { getRestaurant } from "@/lib/menu-repository";
 
-export default function Home() {
-  return (
-    <MenuView
-      restaurant={restaurant}
-      categories={categories}
-      items={menuItems}
-    />
-  );
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const restaurant = await getRestaurant();
+  return <WelcomePage restaurant={restaurant} />;
 }

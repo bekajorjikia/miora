@@ -35,6 +35,54 @@ a {
   color: #1a1a18;
 }
 
+@keyframes welcome-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.welcome-mark {
+  animation: welcome-float 6s ease-in-out infinite;
+}
+
+@media (max-height: 500px) and (min-width: 640px) {
+  .welcome-shell {
+    display: grid;
+    max-width: 60rem;
+    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+    align-items: center;
+    gap: 2.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .welcome-content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .welcome-mark {
+    width: 8.25rem;
+    height: 8.25rem;
+  }
+
+  .welcome-eyebrow {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .welcome-tagline {
+    margin-top: 1rem;
+    font-size: 1.4rem;
+    line-height: 1.25;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -43,6 +91,8 @@ a {
   *,
   *::before,
   *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }

@@ -1,5 +1,6 @@
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { getLocalized } from "@/lib/menu";
+import { getUiStrings } from "@/lib/ui-strings";
 import type { Category, LanguageCode, MenuItem } from "@/lib/types";
 
 interface CategorySectionProps {
@@ -23,12 +24,13 @@ export function CategorySection({
     fallbackLanguage,
   );
   const headingId = `${category.id}-heading`;
+  const strings = getUiStrings(language, fallbackLanguage);
 
   return (
     <section
       id={category.id}
       aria-labelledby={headingId}
-      className="scroll-mt-6"
+      className="scroll-mt-36"
     >
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-black/10 pb-3">
         <h2
@@ -38,7 +40,7 @@ export function CategorySection({
           {categoryName}
         </h2>
         <p className="pb-1 text-[0.625rem] font-extrabold uppercase tracking-[0.16em] text-[#7f8f3a]">
-          {items.length} {items.length === 1 ? "dish" : "dishes"}
+          {strings.dishCount(items.length)}
         </p>
       </div>
 

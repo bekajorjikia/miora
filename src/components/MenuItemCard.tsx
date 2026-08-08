@@ -2,18 +2,12 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { DishDetailSheet } from "@/components/DishDetailSheet";
 import { formatPrice, getLocalized } from "@/lib/menu";
-import type { LanguageCode, MenuItem, Tag } from "@/lib/types";
-
-const tagLabels: Record<Tag, string> = {
-  spicy: "Spicy",
-  vegetarian: "Vegetarian",
-  vegan: "Vegan",
-  "contains-nuts": "Contains nuts",
-  "gluten-free": "Gluten free",
-};
+import { getUiStrings } from "@/lib/ui-strings";
+import type { LanguageCode, MenuItem } from "@/lib/types";
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -28,21 +22,27 @@ export function MenuItemCard({
   fallbackLanguage,
   currency,
 }: MenuItemCardProps) {
+  const [open, setOpen] = useState(false);
   const [imageState, setImageState] = useState<
     "loading" | "loaded" | "error"
   >("loading");
   const imageRef = useRef<HTMLImageElement>(null);
   const itemName = getLocalized(item.name, language, fallbackLanguage);
-  const description = getLocalized(
-    item.description,
-    language,
-    fallbackLanguage,
-  );
   const price =
     item.priceMinor === undefined
       ? null
       : formatPrice(item.priceMinor, currency, language);
   const showImage = Boolean(item.photoUrl) && imageState !== "error";
+  const strings = getUiStrings(language, fallbackLanguage);
+  const handleClose = useCallback(() => setOpen(false), []);
+  const handleCardKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setOpen(true);
+    }
+  };
 
   useEffect(() => {
     const image = imageRef.current;
@@ -61,8 +61,8 @@ export function MenuItemCard({
         }`}
       >
         {!item.available && (
-          <span className="absolute right-3 top-3 z-10 rounded-full bg-[#1a1a18] px-3 py-1.5 text-[0.625rem] font-extrabold uppercase tracking-[0.12em] text-white">
-            Sold out
+          <span className="absolute right-3 top-3 z-30 rounded-full bg-[#1a1a18] px-3 py-1.5 text-[0.625rem] font-extrabold uppercase tracking-[0.12em] text-white">
+            {strings.soldOut}
           </span>
         )}
 
@@ -76,9 +76,13 @@ export function MenuItemCard({
             aria-hidden="true"
             className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_center,#fdfcf9_0%,#f1efe8_72%)]"
           >
-            <span className="font-display text-xl font-semibold tracking-[0.22em] text-[#9a9a90]">
-              MIORA
-            </span>
+            <img
+              src="/miora_black_transparent.png"
+              alt=""
+              width={240}
+              height={80}
+              className="h-20 w-auto opacity-35"
+            />
           </div>
 
           {showImage && (
@@ -117,27 +121,42 @@ export function MenuItemCard({
             )}
           </div>
 
-          {/* <p className="mt-2 text-[0.8125rem] leading-[1.55] text-[#66665f]">
-            {description}
-          </p> */}
-
           {item.tags.length > 0 && (
             <ul
               className="mt-4 flex flex-wrap gap-1.5"
-              aria-label={`Tags for ${itemName}`}
+              aria-label={strings.tagsFor(itemName)}
             >
               {item.tags.map((tag) => (
                 <li
                   key={tag}
                   className="rounded-full bg-[#eef0df] px-2.5 py-1 text-[0.6rem] font-extrabold uppercase tracking-[0.08em] text-[#596323]"
                 >
-                  {tagLabels[tag]}
+                  {strings.tagLabels[tag]}
                 </li>
               ))}
             </ul>
           )}
         </div>
+
+        <button
+          type="button"
+          aria-label={itemName}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={() => setOpen(true)}
+          onKeyDown={handleCardKeyDown}
+          className="absolute inset-0 z-20 cursor-pointer rounded-[1.4rem] transition-colors duration-200 active:bg-black/[0.03] focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-[#7f8f3a]"
+        />
       </article>
+
+      <DishDetailSheet
+        item={item}
+        language={language}
+        fallbackLanguage={fallbackLanguage}
+        currency={currency}
+        open={open}
+        onClose={handleClose}
+      />
     </li>
   );
 }
