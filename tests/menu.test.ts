@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { formatPrice, getLocalized, groupItemsByCategory } from "@/lib/menu";
+import {
+  formatPrice,
+  getLocalized,
+  groupItemsByCategory,
+  nextLanguage,
+  resolveLanguage,
+  searchMenuItems,
+} from "@/lib/menu";
 import type { Category, MenuItem } from "@/lib/types";
 
 describe("getLocalized", () => {
@@ -19,6 +26,32 @@ describe("getLocalized", () => {
 
   it("returns an empty string when both languages are missing", () => {
     expect(getLocalized({}, "ka", "en")).toBe("");
+  });
+});
+
+describe("resolveLanguage", () => {
+  const supported = ["en", "ka"];
+
+  it("returns a supported candidate", () => {
+    expect(resolveLanguage("ka", supported, "en")).toBe("ka");
+  });
+
+  it.each(["fr", null, undefined, ""])(
+    "returns the fallback for %s",
+    (candidate) => {
+      expect(resolveLanguage(candidate, supported, "en")).toBe("en");
+    },
+  );
+});
+
+describe("nextLanguage", () => {
+  it("toggles between English and Georgian", () => {
+    expect(nextLanguage("en", ["en", "ka"])).toBe("ka");
+    expect(nextLanguage("ka", ["en", "ka"])).toBe("en");
+  });
+
+  it("returns the current language when fewer than two are supported", () => {
+    expect(nextLanguage("en", ["en"])).toBe("en");
   });
 });
 
@@ -110,5 +143,75 @@ describe("groupItemsByCategory", () => {
     const grouped = groupItemsByCategory(categories, items);
 
     expect(grouped.some(({ category }) => category.id === "empty")).toBe(false);
+  });
+});
+
+describe("searchMenuItems", () => {
+  const searchableItems: MenuItem[] = [
+    {
+      id: "salmon",
+      restaurantId: "restaurant",
+      categoryId: "sushi",
+      name: { en: "Salmon Nigiri", ka: "ორაგულის ნიგირი" },
+      description: {
+        en: "Aged fish over seasoned rice",
+        ka: "დაძველებული თევზი სუნელებიან ბრინჯზე",
+      },
+      tags: ["gluten-free"],
+      available: true,
+      sortOrder: 1,
+    },
+    {
+      id: "tofu",
+      restaurantId: "restaurant",
+      categoryId: "starters",
+      name: { en: "Crispy Tofu", ka: "ხრაშუნა ტოფუ" },
+      description: {
+        en: "Chilli glaze and peanuts",
+        ka: "ჩილის მინანქარი და არაქისი",
+      },
+      tags: ["spicy", "vegan"],
+      available: true,
+      sortOrder: 2,
+    },
+  ];
+  const tagLabels = {
+    spicy: "Spicy",
+    vegetarian: "Vegetarian",
+    vegan: "Vegan",
+    "contains-nuts": "Contains nuts",
+    "gluten-free": "Gluten free",
+  } as const;
+
+  it("returns no items for a blank query", () => {
+    expect(searchMenuItems(searchableItems, "  ", "en", "en", tagLabels)).toEqual(
+      [],
+    );
+  });
+
+  it("matches names, descriptions, and dietary tags without case sensitivity", () => {
+    expect(
+      searchMenuItems(searchableItems, "SALMON", "en", "en", tagLabels).map(
+        (item) => item.id,
+      ),
+    ).toEqual(["salmon"]);
+    expect(
+      searchMenuItems(searchableItems, "chilli vegan", "en", "en", tagLabels).map(
+        (item) => item.id,
+      ),
+    ).toEqual(["tofu"]);
+  });
+
+  it("searches the selected language", () => {
+    expect(
+      searchMenuItems(searchableItems, "ორაგული", "ka", "en", {
+        ...tagLabels,
+        spicy: "ცხარე",
+        vegetarian: "ვეგეტარიანული",
+        vegan: "ვეგანური",
+        "contains-nuts": "შეიცავს თხილს",
+        "gluten-free": "უგლუტენო",
+      }).map((item) => item.id),
+    ).toEqual(["salmon"]);
   });
 });
