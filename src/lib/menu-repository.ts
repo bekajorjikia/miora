@@ -31,9 +31,38 @@ function seedMenuData(): MenuData {
   };
 }
 
+function allowSeedFallback(): boolean {
+  if (process.env.ALLOW_SEED_FALLBACK === "true") {
+    return true;
+  }
+  return process.env.NODE_ENV !== "production";
+}
+
+function failClosed(reason: string, cause?: unknown): never {
+  const message = `Menu unavailable: ${reason}`;
+  if (cause !== undefined) {
+    console.error(message, cause);
+  } else {
+    console.error(message);
+  }
+  throw new Error(message);
+}
+
+function useSeedOrFail(reason: string, cause?: unknown): MenuData {
+  if (allowSeedFallback()) {
+    if (cause !== undefined) {
+      console.error(`${reason} Falling back to local seed data.`, cause);
+    } else {
+      console.warn(`${reason} Falling back to local seed data.`);
+    }
+    return seedMenuData();
+  }
+  failClosed(reason, cause);
+}
+
 export async function getMenuData(): Promise<MenuData> {
   if (!hasSupabasePublicConfig()) {
-    return seedMenuData();
+    return useSeedOrFail("Supabase public env is not configured.");
   }
 
   try {
@@ -64,7 +93,7 @@ export async function getMenuData(): Promise<MenuData> {
     }
 
     if (!restaurantResult.data || !categoriesResult.data?.length) {
-      return seedMenuData();
+      return useSeedOrFail("Supabase menu is empty or restaurant is missing.");
     }
 
     return {
@@ -74,8 +103,7 @@ export async function getMenuData(): Promise<MenuData> {
       source: "supabase",
     };
   } catch (error) {
-    console.error("Failed to load menu from Supabase, using seed data.", error);
-    return seedMenuData();
+    return useSeedOrFail("Failed to load menu from Supabase.", error);
   }
 }
 

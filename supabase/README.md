@@ -34,4 +34,4 @@ npm run dev
 
 Open `/menu` for the guest menu. Open `/admin/login` for the admin panel.
 
-Data loads from Supabase when tables are seeded; otherwise the guest menu falls back to local seed files. Admin requires Supabase + a logged-in user.
+Data loads from Supabase when tables are seeded. In development, an empty or unreachable DB falls back to local seed files. In production the guest menu fails closed unless `ALLOW_SEED_FALLBACK=true`. Admin always requires Supabase + a logged-in user.
