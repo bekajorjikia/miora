@@ -16,7 +16,7 @@ export function parsePriceMajor(raw: string): number | undefined {
 
   const value = Number(trimmed.replace(",", "."));
   if (!Number.isFinite(value) || value < 0) {
-    throw new Error("Price must be a non-negative number.");
+    throw new Error("ფასი უნდა იყოს არაუარყოფითი რიცხვი.");
   }
 
   return value;

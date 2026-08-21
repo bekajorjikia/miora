@@ -30,13 +30,13 @@ export function CreateCategoryForm() {
       <input
         name="name_en"
         required
-        placeholder="Name (EN)"
+        placeholder="სახელი (EN)"
         className={fieldClass}
       />
       <input
         name="name_ka"
         required
-        placeholder="Name (KA)"
+        placeholder="სახელი (KA)"
         className={fieldClass}
       />
       <button
@@ -44,7 +44,7 @@ export function CreateCategoryForm() {
         disabled={pending}
         className="rounded-lg bg-[#1a1a18] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {pending ? "Adding…" : "Add category"}
+        {pending ? "დამატება…" : "კატეგორიის დამატება"}
       </button>
       {state.error ? (
         <p className="sm:col-span-3 text-sm text-red-700">{state.error}</p>
@@ -71,6 +71,7 @@ function CategoryRowForm({
   const [state, formAction, pending] = useActionState(boundUpdate, initialState);
   const [moving, startMove] = useTransition();
   const [deleting, startDelete] = useTransition();
+  const displayName = category.name.ka || category.name.en;
 
   return (
     <li className="rounded-xl border border-black/10 bg-white p-4">
@@ -92,18 +93,18 @@ function CategoryRowForm({
           disabled={pending}
           className="rounded-lg border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-black/[0.03] disabled:opacity-60"
         >
-          {pending ? "Saving…" : "Save"}
+          {pending ? "შენახვა…" : "შენახვა"}
         </button>
       </form>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#66665f]">
-        <span>{itemCount} items</span>
+        <span>{itemCount} კერძი</span>
         <button
           type="button"
           disabled={isFirst || moving}
           onClick={() => startMove(() => moveCategoryAction(category.id, "up"))}
           className="rounded-md border border-black/10 px-2 py-1 disabled:opacity-40"
         >
-          Up
+          ზემოთ
         </button>
         <button
           type="button"
@@ -111,7 +112,7 @@ function CategoryRowForm({
           onClick={() => startMove(() => moveCategoryAction(category.id, "down"))}
           className="rounded-md border border-black/10 px-2 py-1 disabled:opacity-40"
         >
-          Down
+          ქვემოთ
         </button>
         <button
           type="button"
@@ -119,8 +120,8 @@ function CategoryRowForm({
           onClick={() => {
             const message =
               itemCount > 0
-                ? `Delete “${category.name.en}” and its ${itemCount} items permanently?`
-                : `Delete “${category.name.en}” permanently?`;
+                ? `წავშალოთ „${displayName}“ და მისი ${itemCount} კერძი სამუდამოდ?`
+                : `წავშალოთ „${displayName}“ სამუდამოდ?`;
             if (!window.confirm(message)) {
               return;
             }
@@ -128,7 +129,7 @@ function CategoryRowForm({
           }}
           className="ml-auto rounded-md border border-red-200 px-2 py-1 text-red-700 hover:bg-red-50"
         >
-          {deleting ? "Deleting…" : "Delete"}
+          {deleting ? "წაშლა…" : "წაშლა"}
         </button>
       </div>
       {state.error ? <p className="mt-2 text-sm text-red-700">{state.error}</p> : null}

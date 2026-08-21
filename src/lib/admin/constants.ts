@@ -13,9 +13,9 @@ export const ALL_TAGS: Tag[] = [
 ];
 
 export const TAG_LABELS: Record<Tag, string> = {
-  spicy: "Spicy",
-  vegetarian: "Vegetarian",
-  vegan: "Vegan",
-  "contains-nuts": "Contains nuts",
-  "gluten-free": "Gluten free",
+  spicy: "ცხარე",
+  vegetarian: "ვეგეტარიანული",
+  vegan: "ვეგანური",
+  "contains-nuts": "შეიცავს თხილს",
+  "gluten-free": "უგლუტენო",
 };

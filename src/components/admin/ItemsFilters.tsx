@@ -37,7 +37,7 @@ export function ItemsFilters({
       <input
         type="search"
         defaultValue={q}
-        placeholder="Search by name…"
+        placeholder="ძიება სახელით…"
         onChange={(event) => {
           const value = event.target.value;
           if (debounceRef.current) {
@@ -54,7 +54,7 @@ export function ItemsFilters({
         onChange={(event) => update({ category: event.target.value })}
         className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
       >
-        <option value="">All categories</option>
+        <option value="">ყველა კატეგორია</option>
         {categories.map((entry) => (
           <option key={entry.id} value={entry.id}>
             {entry.label}
@@ -66,9 +66,9 @@ export function ItemsFilters({
         onChange={(event) => update({ availability: event.target.value })}
         className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
       >
-        <option value="">All</option>
-        <option value="available">Available</option>
-        <option value="sold-out">Sold out</option>
+        <option value="">ყველა</option>
+        <option value="available">ხელმისაწვდომი</option>
+        <option value="sold-out">გაყიდულია</option>
       </select>
     </div>
   );

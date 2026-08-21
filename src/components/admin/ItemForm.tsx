@@ -33,7 +33,7 @@ export function ItemForm({
     <form action={formAction} className="space-y-6" encType="multipart/form-data">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
-          <span>Name (EN)</span>
+          <span>სახელი (EN)</span>
           <input
             name="name_en"
             required
@@ -42,7 +42,7 @@ export function ItemForm({
           />
         </label>
         <label className={labelClass}>
-          <span>Name (KA)</span>
+          <span>სახელი (KA)</span>
           <input
             name="name_ka"
             required
@@ -51,7 +51,7 @@ export function ItemForm({
           />
         </label>
         <label className={labelClass}>
-          <span>Description (EN)</span>
+          <span>აღწერა (EN)</span>
           <textarea
             name="description_en"
             rows={3}
@@ -60,7 +60,7 @@ export function ItemForm({
           />
         </label>
         <label className={labelClass}>
-          <span>Description (KA)</span>
+          <span>აღწერა (KA)</span>
           <textarea
             name="description_ka"
             rows={3}
@@ -72,7 +72,7 @@ export function ItemForm({
 
       <div className="grid gap-4 sm:grid-cols-3">
         <label className={labelClass}>
-          <span>Category</span>
+          <span>კატეგორია</span>
           <select
             name="category_id"
             required
@@ -81,19 +81,19 @@ export function ItemForm({
           >
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.name.en}
+                {category.name.ka || category.name.en}
               </option>
             ))}
           </select>
         </label>
         <label className={labelClass}>
-          <span>Price (GEL)</span>
+          <span>ფასი (₾)</span>
           <input
             name="price"
             type="number"
             min="0"
             step="0.01"
-            placeholder="e.g. 24.50"
+            placeholder="მაგ. 24.50"
             defaultValue={
               item?.priceMinor !== undefined
                 ? minorToMajor(item.priceMinor)
@@ -109,12 +109,12 @@ export function ItemForm({
             defaultChecked={item?.available ?? true}
             className="size-4"
           />
-          Available
+          ხელმისაწვდომი
         </label>
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold">Tags</legend>
+        <legend className="text-sm font-semibold">ტეგები</legend>
         <div className="flex flex-wrap gap-3">
           {ALL_TAGS.map((tag) => (
             <label key={tag} className="inline-flex items-center gap-2 text-sm">
@@ -132,7 +132,7 @@ export function ItemForm({
 
       <div className="space-y-3">
         <label className={labelClass}>
-          <span>Photo</span>
+          <span>ფოტო</span>
           <input
             type="file"
             name="photo"
@@ -150,7 +150,7 @@ export function ItemForm({
             />
             <label className="inline-flex items-center gap-2 text-sm">
               <input type="checkbox" name="remove_photo" />
-              Remove current photo
+              მიმდინარე ფოტოს წაშლა
             </label>
           </div>
         ) : null}
@@ -172,7 +172,7 @@ export function ItemForm({
         disabled={pending}
         className="rounded-lg bg-[#1a1a18] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {pending ? "Saving…" : item ? "Save changes" : "Create item"}
+        {pending ? "შენახვა…" : item ? "ცვლილებების შენახვა" : "კერძის შექმნა"}
       </button>
     </form>
   );

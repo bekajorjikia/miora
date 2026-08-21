@@ -21,7 +21,10 @@ export function ItemsTable({
   currency: string;
 }) {
   const categoryNames = Object.fromEntries(
-    categories.map((category) => [category.id, category.name.en]),
+    categories.map((category) => [
+      category.id,
+      category.name.ka || category.name.en,
+    ]),
   );
 
   return (
@@ -29,12 +32,12 @@ export function ItemsTable({
       <table className="min-w-full text-left text-sm">
         <thead className="border-b border-black/10 bg-[#faf9f5] text-xs uppercase tracking-wide text-[#77776e]">
           <tr>
-            <th className="px-4 py-3 font-semibold">Name</th>
-            <th className="px-4 py-3 font-semibold">Category</th>
-            <th className="px-4 py-3 font-semibold">Price</th>
-            <th className="px-4 py-3 font-semibold">Status</th>
-            <th className="px-4 py-3 font-semibold">Order</th>
-            <th className="px-4 py-3 font-semibold">Actions</th>
+            <th className="px-4 py-3 font-semibold">სახელი</th>
+            <th className="px-4 py-3 font-semibold">კატეგორია</th>
+            <th className="px-4 py-3 font-semibold">ფასი</th>
+            <th className="px-4 py-3 font-semibold">სტატუსი</th>
+            <th className="px-4 py-3 font-semibold">რიგი</th>
+            <th className="px-4 py-3 font-semibold">მოქმედებები</th>
           </tr>
         </thead>
         <tbody>
@@ -57,7 +60,7 @@ export function ItemsTable({
           {items.length === 0 ? (
             <tr>
               <td colSpan={6} className="px-4 py-8 text-center text-[#77776e]">
-                No items match these filters.
+                ამ ფილტრებით კერძები ვერ მოიძებნა.
               </td>
             </tr>
           ) : null}
@@ -82,7 +85,8 @@ function ItemRow({
 }) {
   const [moving, startMove] = useTransition();
   const [deleting, startDelete] = useTransition();
-  const name = getLocalized(item.name, "en", "ka");
+  const nameKa = getLocalized(item.name, "ka", "en");
+  const nameEn = getLocalized(item.name, "en", "ka");
 
   return (
     <tr className="border-b border-black/[0.06] last:border-0">
@@ -91,16 +95,14 @@ function ItemRow({
           href={`/admin/items/${item.id}`}
           className="font-semibold hover:underline"
         >
-          {name}
+          {nameKa}
         </Link>
-        <div className="text-xs text-[#888880]">
-          {getLocalized(item.name, "ka", "en")}
-        </div>
+        <div className="text-xs text-[#888880]">{nameEn}</div>
       </td>
       <td className="px-4 py-3 text-[#55554d]">{categoryLabel}</td>
       <td className="px-4 py-3 tabular-nums">
         {item.priceMinor !== undefined
-          ? formatPrice(item.priceMinor, currency, "en-GE")
+          ? formatPrice(item.priceMinor, currency, "ka-GE")
           : "—"}
       </td>
       <td className="px-4 py-3">
@@ -132,20 +134,20 @@ function ItemRow({
             href={`/admin/items/${item.id}`}
             className="text-xs font-semibold text-[#626e2b] hover:underline"
           >
-            Edit
+            რედაქტირება
           </Link>
           <button
             type="button"
             disabled={deleting}
             onClick={() => {
-              if (!window.confirm(`Delete “${name}” permanently?`)) {
+              if (!window.confirm(`წავშალოთ „${nameKa}“ სამუდამოდ?`)) {
                 return;
               }
               startDelete(() => deleteItemAction(item.id));
             }}
             className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50"
           >
-            {deleting ? "…" : "Delete"}
+            {deleting ? "…" : "წაშლა"}
           </button>
         </div>
       </td>

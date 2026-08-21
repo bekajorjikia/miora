@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { ADMIN_RESTAURANT_ID } from "@/lib/admin/constants";
-import { getAdminMenuData, requireAdminUser } from "@/lib/admin/data";
+import {
+  getAdminCategories,
+  getNextCategorySortOrder,
+  requireAdminUser,
+} from "@/lib/admin/data";
 import { createEntityId } from "@/lib/admin/ids";
 
 export type CategoryActionState = {
@@ -25,10 +29,10 @@ function readNames(formData: FormData) {
   const ka = String(formData.get("name_ka") ?? "").trim();
 
   if (!en) {
-    throw new Error("Name (EN) is required.");
+    throw new Error("სახელი (EN) სავალდებულოა.");
   }
   if (!ka) {
-    throw new Error("Name (KA) is required.");
+    throw new Error("სახელი (KA) სავალდებულოა.");
   }
 
   return { en, ka };
@@ -41,10 +45,7 @@ export async function createCategoryAction(
   try {
     const { supabase } = await requireAdminUser();
     const name = readNames(formData);
-    const { categories } = await getAdminMenuData();
-    const sortOrder =
-      categories.reduce((max, category) => Math.max(max, category.sortOrder), 0) +
-      1;
+    const sortOrder = await getNextCategorySortOrder();
     const id = createEntityId(name.en);
 
     const { error } = await supabase.from("categories").insert({
@@ -59,11 +60,11 @@ export async function createCategoryAction(
     }
 
     revalidateMenu();
-    return { success: "Category created." };
+    return { success: "კატეგორია შეიქმნა." };
   } catch (error) {
     return {
       error:
-        error instanceof Error ? error.message : "Failed to create category.",
+        error instanceof Error ? error.message : "კატეგორიის შექმნა ვერ მოხერხდა.",
     };
   }
 }
@@ -88,11 +89,11 @@ export async function updateCategoryAction(
     }
 
     revalidateMenu();
-    return { success: "Saved." };
+    return { success: "შენახულია." };
   } catch (error) {
     return {
       error:
-        error instanceof Error ? error.message : "Failed to update category.",
+        error instanceof Error ? error.message : "კატეგორიის განახლება ვერ მოხერხდა.",
     };
   }
 }
@@ -118,7 +119,7 @@ export async function moveCategoryAction(
   direction: "up" | "down",
 ) {
   const { supabase } = await requireAdminUser();
-  const { categories } = await getAdminMenuData();
+  const categories = await getAdminCategories();
   const ordered = [...categories].sort((a, b) => a.sortOrder - b.sortOrder);
   const index = ordered.findIndex((category) => category.id === categoryId);
   const swapWith =

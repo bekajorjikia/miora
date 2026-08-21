@@ -1,30 +1,39 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 
 import { AdminShell } from "@/components/admin/AdminShell";
+import { MenuQrCard } from "@/components/admin/MenuQrCard";
 import { getAdminMenuData, requireAdminUser } from "@/lib/admin/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [{ user }, { restaurant, categories, items }] = await Promise.all([
+  const [{ user }, { restaurant, categories, items }, requestHeaders] = await Promise.all([
     requireAdminUser(),
     getAdminMenuData(),
+    headers(),
   ]);
 
   const soldOut = items.filter((item) => !item.available).length;
+  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const forwardedHost = requestHeaders.get("x-forwarded-host");
+  const host = forwardedHost ?? requestHeaders.get("host");
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const requestOrigin = host ? `${protocol}://${host}` : "";
+  const menuUrl = `${configuredOrigin || requestOrigin}/menu`;
 
   return (
     <AdminShell email={user.email}>
       <div className="space-y-8">
         <div>
           <h1 className="font-display text-4xl font-semibold">{restaurant.name}</h1>
-          <p className="mt-1 text-[#66665f]">Menu management</p>
+          <p className="mt-1 text-[#66665f]">მენიუს მართვა</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="Categories" value={String(categories.length)} />
-          <Stat label="Items" value={String(items.length)} />
-          <Stat label="Sold out" value={String(soldOut)} />
+          <Stat label="კატეგორიები" value={String(categories.length)} />
+          <Stat label="კერძები" value={String(items.length)} />
+          <Stat label="გაყიდულია" value={String(soldOut)} />
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -32,21 +41,23 @@ export default async function AdminDashboardPage() {
             href="/admin/items/new"
             className="rounded-lg bg-[#1a1a18] px-4 py-2.5 text-sm font-semibold text-white"
           >
-            Add item
+            კერძის დამატება
           </Link>
           <Link
             href="/admin/items"
             className="rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold"
           >
-            Manage items
+            კერძების მართვა
           </Link>
           <Link
             href="/admin/categories"
             className="rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold"
           >
-            Manage categories
+            კატეგორიების მართვა
           </Link>
         </div>
+
+        <MenuQrCard defaultUrl={menuUrl} />
       </div>
     </AdminShell>
   );

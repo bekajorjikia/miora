@@ -51,12 +51,13 @@ export default async function AdminItemsPage({
     return true;
   });
 
+  const categorySortOrder = new Map(
+    categories.map((category) => [category.id, category.sortOrder]),
+  );
   const ordered = [...filtered].sort((a, b) => {
     const categoryOrder =
-      (categories.find((category) => category.id === a.categoryId)?.sortOrder ??
-        0) -
-      (categories.find((category) => category.id === b.categoryId)?.sortOrder ??
-        0);
+      (categorySortOrder.get(a.categoryId) ?? 0) -
+      (categorySortOrder.get(b.categoryId) ?? 0);
     if (categoryOrder !== 0) {
       return categoryOrder;
     }
@@ -68,16 +69,16 @@ export default async function AdminItemsPage({
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-4xl font-semibold">Items</h1>
+            <h1 className="font-display text-4xl font-semibold">კერძები</h1>
             <p className="mt-1 text-sm text-[#66665f]">
-              {ordered.length} shown · {items.length} total
+              ნაჩვენებია {ordered.length} · სულ {items.length}
             </p>
           </div>
           <Link
             href="/admin/items/new"
             className="rounded-lg bg-[#1a1a18] px-4 py-2.5 text-sm font-semibold text-white"
           >
-            Add item
+            კერძის დამატება
           </Link>
         </div>
 
@@ -85,7 +86,7 @@ export default async function AdminItemsPage({
           <ItemsFilters
             categories={categories.map((category) => ({
               id: category.id,
-              label: category.name.en,
+              label: category.name.ka || category.name.en,
             }))}
           />
         </Suspense>

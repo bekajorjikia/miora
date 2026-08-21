@@ -16,7 +16,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value={nextPath} />
       <label className="block space-y-1.5">
-        <span className="text-sm font-semibold">Email</span>
+        <span className="text-sm font-semibold">ელფოსტა</span>
         <input
           type="email"
           name="email"
@@ -26,7 +26,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         />
       </label>
       <label className="block space-y-1.5">
-        <span className="text-sm font-semibold">Password</span>
+        <span className="text-sm font-semibold">პაროლი</span>
         <input
           type="password"
           name="password"
@@ -45,7 +45,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         disabled={pending}
         className="w-full rounded-lg bg-[#1a1a18] px-4 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
       >
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "შესვლა…" : "შესვლა"}
       </button>
     </form>
   );

@@ -8,7 +8,10 @@ import {
   ALL_TAGS,
   MENU_PHOTOS_BUCKET,
 } from "@/lib/admin/constants";
-import { getAdminMenuData, requireAdminUser } from "@/lib/admin/data";
+import {
+  getAdminItemsInCategory,
+  requireAdminUser,
+} from "@/lib/admin/data";
 import { createEntityId } from "@/lib/admin/ids";
 import { majorToMinor, parsePriceMajor } from "@/lib/admin/price";
 import type { Tag } from "@/lib/types";
@@ -90,10 +93,10 @@ function readLocalizedPair(
   const ka = String(formData.get(kaKey) ?? "").trim();
 
   if (!en) {
-    throw new Error(`${requiredLabel} (EN) is required.`);
+    throw new Error(`${requiredLabel} (EN) სავალდებულოა.`);
   }
   if (!ka) {
-    throw new Error(`${requiredLabel} (KA) is required.`);
+    throw new Error(`${requiredLabel} (KA) სავალდებულოა.`);
   }
 
   return { en, ka };
@@ -107,7 +110,7 @@ export async function createItemAction(
 
   try {
     const { supabase } = await requireAdminUser();
-    const name = readLocalizedPair(formData, "name_en", "name_ka", "Name");
+    const name = readLocalizedPair(formData, "name_en", "name_ka", "სახელი");
     const descriptionEn = String(formData.get("description_en") ?? "").trim();
     const descriptionKa = String(formData.get("description_ka") ?? "").trim();
     const categoryId = String(formData.get("category_id") ?? "").trim();
@@ -117,7 +120,7 @@ export async function createItemAction(
     const photo = formData.get("photo");
 
     if (!categoryId) {
-      return { error: "Category is required." };
+      return { error: "კატეგორია სავალდებულოა." };
     }
 
     const { data: existing } = await supabase
@@ -158,7 +161,7 @@ export async function createItemAction(
     createdId = id;
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Failed to create item.",
+      error: error instanceof Error ? error.message : "კერძის შექმნა ვერ მოხერხდა.",
     };
   }
 
@@ -173,7 +176,7 @@ export async function updateItemAction(
 ): Promise<ItemActionState> {
   try {
     const { supabase } = await requireAdminUser();
-    const name = readLocalizedPair(formData, "name_en", "name_ka", "Name");
+    const name = readLocalizedPair(formData, "name_en", "name_ka", "სახელი");
     const descriptionEn = String(formData.get("description_en") ?? "").trim();
     const descriptionKa = String(formData.get("description_ka") ?? "").trim();
     const categoryId = String(formData.get("category_id") ?? "").trim();
@@ -184,7 +187,7 @@ export async function updateItemAction(
     const photo = formData.get("photo");
 
     if (!categoryId) {
-      return { error: "Category is required." };
+      return { error: "კატეგორია სავალდებულოა." };
     }
 
     const { data: current, error: currentError } = await supabase
@@ -198,7 +201,7 @@ export async function updateItemAction(
       return { error: currentError.message };
     }
     if (!current) {
-      return { error: "Item not found." };
+      return { error: "კერძი ვერ მოიძებნა." };
     }
 
     let photoUrl: string | null = current.photo_url;
@@ -235,10 +238,10 @@ export async function updateItemAction(
 
     revalidateMenu();
     revalidatePath(`/admin/items/${itemId}`);
-    return { success: "Saved." };
+    return { success: "შენახულია." };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Failed to update item.",
+      error: error instanceof Error ? error.message : "კერძის განახლება ვერ მოხერხდა.",
     };
   }
 }
@@ -293,25 +296,32 @@ export async function moveItemAction(
   direction: "up" | "down",
 ) {
   const { supabase } = await requireAdminUser();
-  const { items } = await getAdminMenuData();
-  const item = items.find((entry) => entry.id === itemId);
-  if (!item) {
-    throw new Error("Item not found.");
+
+  const { data: current, error: currentError } = await supabase
+    .from("menu_items")
+    .select("id, sort_order, category_id")
+    .eq("id", itemId)
+    .eq("restaurant_id", ADMIN_RESTAURANT_ID)
+    .maybeSingle();
+
+  if (currentError) {
+    throw currentError;
+  }
+  if (!current) {
+    throw new Error("კერძი ვერ მოიძებნა.");
   }
 
-  const siblings = items
-    .filter((entry) => entry.categoryId === item.categoryId)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
-
+  const siblings = await getAdminItemsInCategory(current.category_id as string);
   const index = siblings.findIndex((entry) => entry.id === itemId);
-  const swapWith = direction === "up" ? siblings[index - 1] : siblings[index + 1];
-  if (!swapWith) {
+  const swapWith =
+    direction === "up" ? siblings[index - 1] : siblings[index + 1];
+  if (!swapWith || index === -1) {
     return;
   }
 
   const updates = [
-    { id: item.id, sort_order: swapWith.sortOrder },
-    { id: swapWith.id, sort_order: item.sortOrder },
+    { id: current.id as string, sort_order: swapWith.sortOrder },
+    { id: swapWith.id, sort_order: current.sort_order as number },
   ];
 
   for (const update of updates) {

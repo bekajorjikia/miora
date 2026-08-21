@@ -17,7 +17,7 @@ export async function loginAction(
   const next = String(formData.get("next") ?? "/admin").trim() || "/admin";
 
   if (!email || !password) {
-    return { error: "Email and password are required." };
+    return { error: "ელფოსტა და პაროლი სავალდებულოა." };
   }
 
   const supabase = await createSupabaseSessionClient();
