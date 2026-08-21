@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
+  experimental: {
+    // Soft-nav between admin pages reuses RSC payloads briefly (default dynamic: 0).
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
 };
 
 export default nextConfig;

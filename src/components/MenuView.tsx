@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CategorySection } from "@/components/CategorySection";
@@ -156,9 +157,22 @@ export function MenuView({ restaurant, categories, items }: MenuViewProps) {
     <div className="min-h-dvh overflow-x-clip bg-[#fdfcf9]">
       <header className="sticky top-0 z-40 bg-[#fdfcf9]/95 backdrop-blur-sm">
         <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-4 px-5 py-2.5 sm:px-8">
-          <h1 className="font-display text-[1.625rem] font-bold leading-none tracking-[0.08em] text-[#1a1a18]">
-            {restaurant.name}
-          </h1>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-white">
+              <Image
+                src="/miora_black_transparent.png"
+                alt=""
+                aria-hidden="true"
+                width={40}
+                height={40}
+                priority
+                className="h-full w-full origin-top scale-[1.08] object-cover object-top"
+              />
+            </div>
+            <h1 className="font-display text-[1.625rem] font-bold leading-none tracking-[0.08em] text-[#1a1a18]">
+              {restaurant.name}
+            </h1>
+          </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <button
               type="button"

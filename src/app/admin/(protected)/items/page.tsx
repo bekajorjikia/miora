@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { AdminShell } from "@/components/admin/AdminShell";
 import { ItemsFilters } from "@/components/admin/ItemsFilters";
 import { ItemsTable } from "@/components/admin/ItemsTable";
-import { getAdminMenuData, requireAdminUser } from "@/lib/admin/data";
+import { getAdminMenuData } from "@/lib/admin/data";
 import { getLocalized } from "@/lib/menu";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +18,7 @@ export default async function AdminItemsPage({
   }>;
 }) {
   const params = await searchParams;
-  const [{ user }, { restaurant, categories, items }] = await Promise.all([
-    requireAdminUser(),
-    getAdminMenuData(),
-  ]);
+  const { restaurant, categories, items } = await getAdminMenuData();
 
   const query = (params.q ?? "").trim().toLocaleLowerCase();
   const filtered = items.filter((item) => {
@@ -65,38 +61,36 @@ export default async function AdminItemsPage({
   });
 
   return (
-    <AdminShell email={user.email}>
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="font-display text-4xl font-semibold">კერძები</h1>
-            <p className="mt-1 text-sm text-[#66665f]">
-              ნაჩვენებია {ordered.length} · სულ {items.length}
-            </p>
-          </div>
-          <Link
-            href="/admin/items/new"
-            className="rounded-lg bg-[#1a1a18] px-4 py-2.5 text-sm font-semibold text-white"
-          >
-            კერძის დამატება
-          </Link>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-4xl font-semibold">კერძები</h1>
+          <p className="mt-1 text-sm text-[#66665f]">
+            ნაჩვენებია {ordered.length} · სულ {items.length}
+          </p>
         </div>
-
-        <Suspense fallback={null}>
-          <ItemsFilters
-            categories={categories.map((category) => ({
-              id: category.id,
-              label: category.name.ka || category.name.en,
-            }))}
-          />
-        </Suspense>
-
-        <ItemsTable
-          items={ordered}
-          categories={categories}
-          currency={restaurant.currency}
-        />
+        <Link
+          href="/admin/items/new"
+          className="rounded-lg bg-[#1a1a18] px-4 py-2.5 text-sm font-semibold text-white"
+        >
+          კერძის დამატება
+        </Link>
       </div>
-    </AdminShell>
+
+      <Suspense fallback={null}>
+        <ItemsFilters
+          categories={categories.map((category) => ({
+            id: category.id,
+            label: category.name.ka || category.name.en,
+          }))}
+        />
+      </Suspense>
+
+      <ItemsTable
+        items={ordered}
+        categories={categories}
+        currency={restaurant.currency}
+      />
+    </div>
   );
 }

@@ -4,6 +4,10 @@ import type { Tag } from "@/lib/types";
 export const ADMIN_RESTAURANT_ID = seedRestaurant.id;
 export const MENU_PHOTOS_BUCKET = "menu-photos";
 
+/** Set by middleware after getUser(); stripped from inbound requests first. */
+export const ADMIN_USER_ID_HEADER = "x-miora-admin-user-id";
+export const ADMIN_USER_EMAIL_HEADER = "x-miora-admin-user-email";
+
 export const ALL_TAGS: Tag[] = [
   "spicy",
   "vegetarian",
