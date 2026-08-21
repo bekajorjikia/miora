@@ -17,7 +17,8 @@ export default async function AdminDashboardPage() {
   const host = forwardedHost ?? requestHeaders.get("host");
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
   const requestOrigin = host ? `${protocol}://${host}` : "";
-  const menuUrl = `${configuredOrigin || requestOrigin}/menu`;
+  // Guest entry is the welcome page; guests continue to /menu from there.
+  const menuUrl = configuredOrigin || requestOrigin;
 
   return (
     <div className="space-y-8">

@@ -115,7 +115,7 @@ export function MenuQrCard({ defaultUrl }: { defaultUrl: string }) {
           <div>
             <h2 className="font-display text-2xl font-semibold">მენიუს QR კოდი</h2>
             <p className="mt-1 text-sm text-[#66665f]">
-              ჩასვით ნებისმიერი ბმული — QR ავტომატურად განახლდება.
+              სტუმარი ჯერ welcome გვერდზე შედის, შემდეგ მენიუში. ჩასვით სხვა ბმული — QR განახლდება.
             </p>
           </div>
 
@@ -127,7 +127,7 @@ export function MenuQrCard({ defaultUrl }: { defaultUrl: string }) {
               type="url"
               value={menuUrl}
               onChange={(event) => setMenuUrl(event.target.value)}
-              placeholder="https://your-domain.com/menu"
+              placeholder="https://your-domain.com"
               spellCheck={false}
               className="w-full rounded-lg border border-black/10 bg-[#f4f3ef] px-3 py-2.5 font-mono text-sm text-[#1a1a18] outline-none ring-[#626e2b]/40 focus:ring-2"
             />
