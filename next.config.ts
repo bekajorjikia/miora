@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
     staleTimes: {
       dynamic: 30,
     },
+    serverActions: {
+      // Photos are shrunk in the browser first; this is the safety net for
+      // clients where that fails. Vercel caps request bodies at 4.5 MB.
+      bodySizeLimit: "4mb",
+    },
   },
 };
 

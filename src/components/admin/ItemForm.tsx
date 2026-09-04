@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 
 import {
   createItemAction,
@@ -8,6 +8,7 @@ import {
   type ItemActionState,
 } from "@/app/admin/actions/items";
 import { ALL_TAGS, TAG_LABELS } from "@/lib/admin/constants";
+import { MAX_UPLOAD_BYTES, shrinkImageFile } from "@/lib/admin/image";
 import { minorToMajor } from "@/lib/admin/price";
 import type { Category, MenuItem } from "@/lib/types";
 
@@ -28,6 +29,44 @@ export function ItemForm({
     ? updateItemAction.bind(null, item.id)
     : createItemAction;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [photoError, setPhotoError] = useState("");
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Shrink the picked photo before submit: full-size camera shots blow past the
+   * Server Action body limit and the request fails before our action runs.
+   */
+  async function handlePhotoChange() {
+    const input = photoInputRef.current;
+    const file = input?.files?.[0];
+    setPhotoError("");
+
+    if (!input || !file) {
+      return;
+    }
+
+    setPreparingPhoto(true);
+    try {
+      const prepared = await shrinkImageFile(file);
+
+      if (prepared.size > MAX_UPLOAD_BYTES) {
+        input.value = "";
+        setPhotoError(
+          "ფოტო ძალიან დიდია. აირჩიეთ 4 MB-ზე პატარა სურათი (ან JPEG/PNG ფორმატში).",
+        );
+        return;
+      }
+
+      if (prepared !== file) {
+        const transfer = new DataTransfer();
+        transfer.items.add(prepared);
+        input.files = transfer.files;
+      }
+    } finally {
+      setPreparingPhoto(false);
+    }
+  }
 
   return (
     <form action={formAction} className="space-y-6" encType="multipart/form-data">
@@ -134,12 +173,22 @@ export function ItemForm({
         <label className={labelClass}>
           <span>ფოტო</span>
           <input
+            ref={photoInputRef}
             type="file"
             name="photo"
             accept="image/*"
+            onChange={handlePhotoChange}
             className="block w-full text-sm"
           />
         </label>
+        {preparingPhoto ? (
+          <p className="text-sm text-[#66665f]">ფოტო მუშავდება…</p>
+        ) : null}
+        {photoError ? (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            {photoError}
+          </p>
+        ) : null}
         {item?.photoUrl ? (
           <div className="flex flex-wrap items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,7 +218,7 @@ export function ItemForm({
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || preparingPhoto}
         className="rounded-lg bg-[#1a1a18] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
       >
         {pending ? "შენახვა…" : item ? "ცვლილებების შენახვა" : "კერძის შექმნა"}
