@@ -6,6 +6,10 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const nextConfig: NextConfig = {
   images: {
+    // Photos uploaded before the long cache headers still say max-age=3600.
+    // Hold the optimized copies for a month anyway, so Supabase is read once
+    // per photo instead of hourly.
+    minimumCacheTTL: 2592000,
     remotePatterns: supabaseHost
       ? [
           {

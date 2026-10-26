@@ -93,7 +93,6 @@ export function MenuItemCard({
               alt={itemName}
               fill
               sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 92vw"
-              quality={70}
               loading="lazy"
               onLoad={() => setImageState("loaded")}
               onError={() => setImageState("error")}

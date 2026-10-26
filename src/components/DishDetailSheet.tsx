@@ -277,7 +277,6 @@ export function DishDetailSheet({
                   alt={itemName}
                   fill
                   sizes="(min-width: 640px) 640px, 100vw"
-                  quality={72}
                   onLoad={() => setImageState("loaded")}
                   onError={() => setImageState("error")}
                   className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${

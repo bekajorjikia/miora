@@ -9,4 +9,4 @@
  * Set it back to `false` as soon as Supabase is healthy: while it is on, a
  * future outage silently serves a stale menu instead of an honest error.
  */
-export const forceSeedFallback = true;
+export const forceSeedFallback = false;
