@@ -34,6 +34,17 @@ npm run dev
 Without Supabase configured, **development** falls back to local seed data so
 UI work can continue. **Production** fails closed unless `ALLOW_SEED_FALLBACK=true`.
 
+### Caching
+
+The guest menu is read from Supabase once and cached until it changes: every
+admin write drops the cache by tag. There is no timed refresh, so an untouched
+menu costs no database reads at all. A change made outside the admin panel (SQL
+editor, `npm run seed`) is the exception — save anything in the admin panel, or
+deploy, to pick it up.
+
+Dish photos go through `next/image`, so the host fetches each one from Supabase
+Storage about once a month and serves resized copies from its own CDN.
+
 ### Offline fallback (emergency)
 
 `src/lib/seed-data.ts` is generated — it mirrors the live menu, prices, photo
