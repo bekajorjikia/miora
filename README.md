@@ -34,6 +34,25 @@ npm run dev
 Without Supabase configured, **development** falls back to local seed data so
 UI work can continue. **Production** fails closed unless `ALLOW_SEED_FALLBACK=true`.
 
+### Offline fallback (emergency)
+
+`src/lib/seed-data.ts` is generated — it mirrors the live menu, prices, photo
+URLs and availability included. Refresh it from a Supabase export (the query is
+documented at the top of the script):
+
+```bash
+npx tsx scripts/generate-seed.ts path/to/export.json
+```
+
+If Supabase is unreachable (quota, outage), the mirror can be served to guests
+in two ways: set `ALLOW_SEED_FALLBACK=true` on the host, or — when the hosting
+dashboard itself is out of reach — flip `forceSeedFallback` in
+[`src/lib/menu-fallback.ts`](src/lib/menu-fallback.ts) and push; the deploy
+carries the switch. Photos still come from Supabase Storage, so they
+fall back to the logo placeholder while it is down, and the admin panel stays
+unavailable. Turn the switch (and the flag) off as soon as Supabase is back, or a future
+outage will quietly serve a stale menu.
+
 ## Scripts
 
 | Command | What |
@@ -43,6 +62,7 @@ UI work can continue. **Production** fails closed unless `ALLOW_SEED_FALLBACK=tr
 | `npm test` | Unit tests |
 | `npm run lint` | ESLint |
 | `npm run seed` | Upsert menu into Supabase (needs service role key) |
+| `npx tsx scripts/generate-seed.ts <export.json>` | Regenerate the offline seed mirror |
 
 ## Routes
 
@@ -60,4 +80,4 @@ UI work can continue. **Production** fails closed unless `ALLOW_SEED_FALLBACK=tr
 - [ ] Create one admin user; disable open signup in Supabase Auth
 - [ ] Confirm guest menu loads from Supabase (`source` is not seed)
 - [ ] Smoke-test: admin edit → guest sees update; photo upload works
-- [ ] Do **not** set `ALLOW_SEED_FALLBACK=true` on production unless emergency
+- [ ] Do **not** set `ALLOW_SEED_FALLBACK=true` (or `forceSeedFallback`) on production unless emergency
