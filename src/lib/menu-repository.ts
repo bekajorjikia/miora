@@ -1,3 +1,6 @@
+import { unstable_cache } from "next/cache";
+
+import { forceSeedFallback } from "@/lib/menu-fallback";
 import {
   categories as seedCategories,
   menuItems as seedMenuItems,
@@ -32,6 +35,9 @@ function seedMenuData(): MenuData {
 }
 
 function allowSeedFallback(): boolean {
+  if (forceSeedFallback) {
+    return true;
+  }
   if (process.env.ALLOW_SEED_FALLBACK === "true") {
     return true;
   }
@@ -48,7 +54,7 @@ function failClosed(reason: string, cause?: unknown): never {
   throw new Error(message);
 }
 
-function useSeedOrFail(reason: string, cause?: unknown): MenuData {
+function seedOrFail(reason: string, cause?: unknown): MenuData {
   if (allowSeedFallback()) {
     if (cause !== undefined) {
       console.error(`${reason} Falling back to local seed data.`, cause);
@@ -60,9 +66,10 @@ function useSeedOrFail(reason: string, cause?: unknown): MenuData {
   failClosed(reason, cause);
 }
 
-export async function getMenuData(): Promise<MenuData> {
+/** Uncached read, straight from Supabase. Exported for tests. */
+export async function fetchMenuData(): Promise<MenuData> {
   if (!hasSupabasePublicConfig()) {
-    return useSeedOrFail("Supabase public env is not configured.");
+    return seedOrFail("Supabase public env is not configured.");
   }
 
   try {
@@ -93,7 +100,7 @@ export async function getMenuData(): Promise<MenuData> {
     }
 
     if (!restaurantResult.data || !categoriesResult.data?.length) {
-      return useSeedOrFail("Supabase menu is empty or restaurant is missing.");
+      return seedOrFail("Supabase menu is empty or restaurant is missing.");
     }
 
     return {
@@ -103,8 +110,24 @@ export async function getMenuData(): Promise<MenuData> {
       source: "supabase",
     };
   } catch (error) {
-    return useSeedOrFail("Failed to load menu from Supabase.", error);
+    return seedOrFail("Failed to load menu from Supabase.", error);
   }
+}
+
+/** Admin writes call revalidateTag with this so guests see edits at once. */
+export const MENU_CACHE_TAG = "menu";
+
+/**
+ * Guests all read the same menu, so one Supabase read serves everyone for a
+ * while. Keeps the free-tier egress budget for photos instead of row fetches.
+ */
+const loadMenuData = unstable_cache(fetchMenuData, ["menu-data"], {
+  revalidate: 600,
+  tags: [MENU_CACHE_TAG],
+});
+
+export async function getMenuData(): Promise<MenuData> {
+  return loadMenuData();
 }
 
 export async function getRestaurant(): Promise<Restaurant> {

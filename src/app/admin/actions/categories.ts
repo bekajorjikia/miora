@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { ADMIN_RESTAURANT_ID } from "@/lib/admin/constants";
@@ -10,6 +10,7 @@ import {
   requireAdminUser,
 } from "@/lib/admin/data";
 import { createEntityId } from "@/lib/admin/ids";
+import { MENU_CACHE_TAG } from "@/lib/menu-repository";
 
 export type CategoryActionState = {
   error?: string;
@@ -17,6 +18,7 @@ export type CategoryActionState = {
 };
 
 function revalidateMenu() {
+  revalidateTag(MENU_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/items");
   revalidatePath("/admin/categories");
