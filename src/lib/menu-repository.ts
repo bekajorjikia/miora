@@ -118,11 +118,17 @@ export async function fetchMenuData(): Promise<MenuData> {
 export const MENU_CACHE_TAG = "menu";
 
 /**
- * Guests all read the same menu, so one Supabase read serves everyone for a
- * while. Keeps the free-tier egress budget for photos instead of row fetches.
+ * Guests all read the same menu, so one Supabase read serves everyone until the
+ * menu actually changes: every admin write drops this cache by tag, and nothing
+ * else writes to the menu. There is deliberately no time limit — a refresh on a
+ * timer would re-read ~68 KB of rows all day for a menu nobody edited.
+ *
+ * The one case this does not cover is a change made outside the admin panel
+ * (SQL editor, `npm run seed`). Saving anything in the admin panel, or any
+ * deploy, refreshes it again.
  */
 const loadMenuData = unstable_cache(fetchMenuData, ["menu-data"], {
-  revalidate: 600,
+  revalidate: false,
   tags: [MENU_CACHE_TAG],
 });
 
