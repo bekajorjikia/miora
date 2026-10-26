@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DishDetailSheet } from "@/components/DishDetailSheet";
@@ -85,13 +86,14 @@ export function MenuItemCard({
             />
           </div>
 
-          {showImage && (
-            <img
+          {showImage && item.photoUrl && (
+            <Image
               ref={imageRef}
               src={item.photoUrl}
               alt={itemName}
-              width={720}
-              height={720}
+              fill
+              sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 92vw"
+              quality={70}
               loading="lazy"
               onLoad={() => setImageState("loaded")}
               onError={() => setImageState("error")}

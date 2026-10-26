@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -269,13 +270,14 @@ export function DishDetailSheet({
                 />
               </div>
 
-              {showImage && (
-                <img
+              {showImage && item.photoUrl && (
+                <Image
                   ref={imageRef}
                   src={item.photoUrl}
                   alt={itemName}
-                  width={1200}
-                  height={900}
+                  fill
+                  sizes="(min-width: 640px) 640px, 100vw"
+                  quality={72}
                   onLoad={() => setImageState("loaded")}
                   onError={() => setImageState("error")}
                   className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${

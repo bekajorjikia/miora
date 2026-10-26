@@ -1,8 +1,8 @@
 /** Longest edge of a stored dish photo — plenty for the menu card and detail sheet. */
-const MAX_DIMENSION = 1600;
-const JPEG_QUALITY = 0.8;
+const MAX_DIMENSION = 1200;
+const JPEG_QUALITY = 0.75;
 /** Files under this are already cheap to upload; skip the re-encode. */
-const SKIP_BELOW_BYTES = 512 * 1024;
+const SKIP_BELOW_BYTES = 200 * 1024;
 /** Vercel rejects request bodies above 4.5 MB before they reach the server action. */
 export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -13,6 +13,7 @@ import {
   requireAdminUser,
 } from "@/lib/admin/data";
 import { createEntityId } from "@/lib/admin/ids";
+import { MENU_CACHE_TAG } from "@/lib/menu-repository";
 import { majorToMinor, parsePriceMajor } from "@/lib/admin/price";
 import type { Tag } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export type ItemActionState = {
 };
 
 function revalidateMenu() {
+  revalidateTag(MENU_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/items");
   revalidatePath("/admin/categories");
@@ -59,7 +61,8 @@ async function uploadPhoto(
   const { error } = await supabase.storage
     .from(MENU_PHOTOS_BUCKET)
     .upload(path, file, {
-      cacheControl: "3600",
+      // Paths are unique per upload, so the object never changes under its URL.
+      cacheControl: "31536000, immutable",
       upsert: true,
       contentType: file.type || "image/jpeg",
     });
